@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * AtomicPositiveInteger
+ * 正数，同时处理了AtomicInteger边界问题
  */
 public class AtomicPositiveInteger extends Number {
 

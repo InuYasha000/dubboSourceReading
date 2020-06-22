@@ -293,14 +293,14 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
     }
 
     /**
-     * 执行暴露服务
+     * 执行暴露服务,synchronized保证了
      */
     protected synchronized void doExport() {
-        // 检查是否可以暴露，若可以，标记已经暴露。
+        // 检查是否可以暴露，若可以，标记已经暴露。(目前在AnnotationBean.destroy()调用，表示destroy)
         if (unexported) {
             throw new IllegalStateException("Already unexported!");
         }
-        if (exported) {
+        if (exported) {//避免重复暴露
             return;
         }
         exported = true;
@@ -478,12 +478,11 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         // 协议名
         String name = protocolConfig.getName();
         if (name == null || name.length() == 0) {
-            name = "dubbo";
+            name = "dubbo";//默认dubbo协议
         }
 
         // 将 `side`，`dubbo`，`timestamp`，`pid` 参数，添加到 `map` 集合中。
         Map<String, String> map = new HashMap<String, String>();
-        map.put(Constants.SIDE_KEY, Constants.PROVIDER_SIDE);
         map.put(Constants.DUBBO_VERSION_KEY, Version.getVersion());
         map.put(Constants.TIMESTAMP_KEY, String.valueOf(System.currentTimeMillis()));
         if (ConfigUtils.getPid() > 0) {

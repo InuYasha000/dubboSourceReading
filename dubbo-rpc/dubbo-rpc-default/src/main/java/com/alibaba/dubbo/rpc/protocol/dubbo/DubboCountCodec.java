@@ -44,18 +44,19 @@ public final class DubboCountCodec implements Codec2 {
         codec.encode(channel, buffer, msg);
     }
 
+    //1)多消息解析的支持。2）记录每条消息的长度，用于 MonitorFilter 监控
     @Override
     public Object decode(Channel channel, ChannelBuffer buffer) throws IOException {
-        // 记录当前读位置
+        // 记录当前读位置,用于下面计算每条消息的长度
         int save = buffer.readerIndex();
-        // 创建 MultiMessage 对象
+        // 创建 MultiMessage 对象,MultiMessageHandler 支持对它的处理分发
         MultiMessage result = MultiMessage.create();
         do {
             // 解码
             Object obj = codec.decode(channel, buffer);
             // 输入不够，重置读进度
             if (Codec2.DecodeResult.NEED_MORE_INPUT == obj) {
-                buffer.readerIndex(save);
+                buffer.readerIndex(save);//字节数组不够，重置读进度，结束解析。
                 break;
             // 解析到消息
             } else {

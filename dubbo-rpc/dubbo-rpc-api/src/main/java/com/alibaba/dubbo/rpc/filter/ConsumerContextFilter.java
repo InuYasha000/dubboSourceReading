@@ -30,7 +30,7 @@ import com.alibaba.dubbo.rpc.RpcInvocation;
 /**
  * ConsumerContextInvokerFilter
  *
- * 服务消费者的 ContextFilter
+ * 服务消费者的 ContextFilter,负责发起调用时，初始化 RpcContext
  */
 @Activate(group = Constants.CONSUMER, order = -10000)
 public class ConsumerContextFilter implements Filter {

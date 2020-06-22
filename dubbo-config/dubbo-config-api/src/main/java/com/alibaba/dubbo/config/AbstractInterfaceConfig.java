@@ -205,10 +205,12 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                     address = Constants.ANYHOST_VALUE;
                 }
                 String sysaddress = System.getProperty("dubbo.registry.address"); // 从启动参数读取
+                //若存在，最高优先级，进行覆盖。
                 if (sysaddress != null && sysaddress.length() > 0) {
                     address = sysaddress;
                 }
                 // 有效的地址
+                //"N/A" 代表不配置注册中心
                 if (address.length() > 0
                         && !RegistryConfig.NO_AVAILABLE.equalsIgnoreCase(address)) {
                     Map<String, String> map = new HashMap<String, String>();
@@ -311,7 +313,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     /**
      * 校验接口和方法
      *  1. 接口类非空，并是接口
-     *  2. 方法在接口中已定义
+     *  2. 方法在接口中已定义（接口中是否有这个方法）
      *
      * @param interfaceClass 接口类
      * @param methods 方法数组

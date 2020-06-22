@@ -69,6 +69,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * 所有配置最终都将转换为 URL 表示，并由服务提供方生成，经注册中心传递给消费方，各属性对应 URL 的参数，参见配置项一览表中的 "对应URL参数" 列。
  * 来自 <a href="https://dubbo.gitbooks.io/dubbo-user-book/references/xml/introduction.html">schema 配置参考手册</>
  *
+ * dubbo://192.168.3.17:20880/com.alibaba.dubbo.demo.DemoService?anyhost=true&application=demo-provider&default.delay=-1
+ * &default.retries=0&default.service.filter=demoFilter&delay=-1&dubbo=2.0.0
+ * &generic=false&interface=com.alibaba.dubbo.demo.DemoService&methods=sayHello&pid=19031&side=provider&timestamp=1519651641799
+ *
  * @see java.net.URL
  * @see java.net.URI
  */

@@ -83,6 +83,8 @@ public class ExtensionLoader<T> {
      *
      * key：拓展接口
      */
+    //一方面，ExtensionLoader 是 ExtensionLoader 的管理容器。
+    // 一个拓展( 拓展接口 )对应一个 ExtensionLoader 对象。例如，Protocol 和 Filter 分别对应一个 ExtensionLoader 对象
     private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<Class<?>, ExtensionLoader<?>>();
     /**
      * 拓展实现类集合
