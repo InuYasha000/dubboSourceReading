@@ -49,8 +49,25 @@ public class ProtocolFilterWrapper implements Protocol {
      * 创建带 Filter 链的 Invoker 对象
      *
      * @param invoker Invoker 对象
-     * @param key 获取 URL 参数名
+     * @param key 获取 URL 参数名， URL 参数名
+     * 该参数用于获得 ServiceConfig 或 ReferenceConfig 配置的自定义过滤器。
+     * 以 ServiceConfig 举例子，
+     * 例如 url = injvm://127.0.0.1/com.alibaba.dubbo.demo.DemoService
+     * ?anyhost=true&application=demo-provider
+     * &bind.ip=192.168.3.17&bind.port=20880&default.delay=-1
+     * &default.retries=0&default.service.filter=demo
+     * &delay=-1&dubbo=2.0.0&generic=false&interface=com.alibaba.dubbo.demo.DemoService
+     * &methods=sayHello&pid=81844&qos.port=22222&service.filter=demo&side=provider
+     * &timestamp=1520682156043 中，
+     * service.filter=demo，
+     *
+     * 对应配置是 <dubbo:service interface="com.alibaba.dubbo.demo.DemoService" ref="demoService" filter="demo" />
+     * 这是配置自定义的 DemoFilter 过滤器。
+     *
      * @param group 分组
+     * 在暴露服务时，group = provider
+     * 在引用服务时，group = consumer
+     *
      * @param <T> 泛型
      * @return Invoker 对象
      */
@@ -60,6 +77,7 @@ public class ProtocolFilterWrapper implements Protocol {
         List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).getActivateExtension(invoker.getUrl(), key, group);
         // 倒序循环 Filter ，创建带 Filter 链的 Invoker 对象
         if (!filters.isEmpty()) {
+            //因为是通过嵌套声明匿名类循环调用的方式，所以要倒序
             for (int i = filters.size() - 1; i >= 0; i--) {
                 final Filter filter = filters.get(i);
                 final Invoker<T> next = last;
@@ -80,6 +98,7 @@ public class ProtocolFilterWrapper implements Protocol {
                         return invoker.isAvailable();
                     }
 
+                    //建立带有 Filter 过滤链的 Invoker
                     @Override
                     public Result invoke(Invocation invocation) throws RpcException {
                         return filter.invoke(next, invocation);
@@ -109,7 +128,8 @@ public class ProtocolFilterWrapper implements Protocol {
     }
 
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
-        // 注册中心
+        // 传进来的是注册中心的 URL ，无需创建 Filter 过滤链。
+        // 注册中心,本地暴露服务不会符合这个判断,远程暴露服务会符合暴露该判断
         if (Constants.REGISTRY_PROTOCOL.equals(invoker.getUrl().getProtocol())) {
             return protocol.export(invoker);
         }

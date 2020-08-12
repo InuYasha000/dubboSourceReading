@@ -625,7 +625,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                 }
                 if (registryURLs != null && !registryURLs.isEmpty()) {
                     for (URL registryURL : registryURLs) {
-                        // "dynamic" ：服务是否动态注册，如果设为false，注册后将显示后disable状态，需人工启用，并且服务提供者停止时，也不会自动取消册，需人工禁用。
+                        // "dynamic" ：服务是否动态注册，如果设为false，注册后将显示disable状态，需人工启用，并且服务提供者停止时，也不会自动取消注册，需人工禁用。
                         url = url.addParameterIfAbsent("dynamic", registryURL.getParameter("dynamic"));
                         // 获得监控中心 URL
                         URL monitorUrl = loadMonitor(registryURL); // TODO 芋艿，监控
@@ -635,6 +635,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                         if (logger.isInfoEnabled()) {
                             logger.info("Register dubbo service " + interfaceClass.getName() + " url " + url + " to registry " + registryURL);
                         }
+                        //将服务体的 URL 作为 "export" 参数添加到注册中心的 URL 中。通过这样的方式，注册中心的 URL 中，包含了服务提供者的配置。
                         // 使用 ProxyFactory 创建 Invoker 对象
                         Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));
 
@@ -672,6 +673,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
     private void exportLocal(URL url) {
         if (!Constants.LOCAL_PROTOCOL.equalsIgnoreCase(url.getProtocol())) {
             // 创建本地 Dubbo URL
+            // 在原先url基础上设置属性 protocol=injvm,host=127.0.0.1,port=0
             URL local = URL.valueOf(url.toFullString())
                     .setProtocol(Constants.LOCAL_PROTOCOL) // injvm
                     .setHost(LOCALHOST) // 本地
@@ -680,6 +682,12 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             ServiceClassHolder.getInstance().pushServiceClass(getServiceClass(ref));
             // 使用 ProxyFactory 创建 Invoker 对象
             // 使用 Protocol 暴露 Invoker 对象
+            //ref--service,interfaceClass--接口类型，local--url
+            //该 Invoker 对象，执行 #invoke(invocation) 方法时，内部会调用 Service 对象( ref )对应的调用方法
+            //此处 Dubbo SPI 自适应的特性的Protocol 好处就出来了，可以自动根据 URL 参数，获得对应的拓展实现。
+            // 例如，invoker 传入后，根据 invoker.url 自动获得对应 Protocol 拓展实现为 InjvmProtocol 。
+            //实际上，Protocol 有两个 Wrapper 拓展实现类： ProtocolFilterWrapper、ProtocolListenerWrapper 。
+            // 所以，#export(...) 方法的调用顺序是：Protocol$Adaptive => ProtocolFilterWrapper => ProtocolListenerWrapper => InjvmProtocol 。
             Exporter<?> exporter = protocol.export(proxyFactory.getInvoker(ref, (Class) interfaceClass, local));
             // 添加到 `exporters`
             exporters.add(exporter);

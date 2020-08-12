@@ -193,7 +193,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
      * @return URL 数组
      */
     protected List<URL> loadRegistries(boolean provider) {
-        // 校验 RegistryConfig 配置数组。
+        // 校验 RegistryConfig 配置数组。其实也是初始化RegistryConfig
         checkRegistry();
         // 创建 注册中心 URL 数组
         List<URL> registryList = new ArrayList<URL>();
@@ -240,6 +240,8 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                         url = url.addParameter(Constants.REGISTRY_KEY, url.getProtocol());
                         url = url.setProtocol(Constants.REGISTRY_PROTOCOL);
                         // 添加到结果
+                        //若是服务提供者，判断是否只订阅不注册
+                        //若是服务消费者，判断是否只注册不订阅
                         if ((provider && url.getParameter(Constants.REGISTER_KEY, true)) // 服务提供者 && 注册 https://dubbo.gitbooks.io/dubbo-user-book/demos/subscribe-only.html
                                 || (!provider && url.getParameter(Constants.SUBSCRIBE_KEY, true))) { // 服务消费者 && 订阅 https://dubbo.gitbooks.io/dubbo-user-book/demos/registry-only.html
                             registryList.add(url);
@@ -304,9 +306,11 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
             // 解析地址，创建 Dubbo URL 对象。
             return UrlUtils.parseURL(address, map);
         // 从注册中心发现监控中心地址
+        // protocol = registry
         } else if (Constants.REGISTRY_PROTOCOL.equals(monitor.getProtocol()) && registryURL != null) {
             return registryURL.setProtocol("dubbo").addParameter(Constants.PROTOCOL_KEY, "registry").addParameterAndEncoded(Constants.REFER_KEY, StringUtils.toQueryString(map));
         }
+        // 无注册中心，返回空
         return null;
     }
 

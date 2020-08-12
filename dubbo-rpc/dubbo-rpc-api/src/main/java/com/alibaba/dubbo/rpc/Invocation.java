@@ -31,6 +31,7 @@ public interface Invocation {
 
     /**
      * get method name.
+     * 获得方法名
      *
      * @return method name.
      * @serial
@@ -39,6 +40,7 @@ public interface Invocation {
 
     /**
      * get parameter types.
+     * 获得方法参数类型数组
      *
      * @return parameter types.
      * @serial
@@ -47,6 +49,7 @@ public interface Invocation {
 
     /**
      * get arguments.
+     * 获得方法参数数组
      *
      * @return arguments.
      * @serial
@@ -55,6 +58,7 @@ public interface Invocation {
 
     /**
      * get attachments.
+     * 获得隐式参数，和 HTTP Request Header 有些相似
      *
      * @return attachments.
      * @serial
@@ -79,6 +83,7 @@ public interface Invocation {
 
     /**
      * get the invoker in current context.
+     * 获得对应的 Invoker 对象
      *
      * @return invoker.
      * @transient

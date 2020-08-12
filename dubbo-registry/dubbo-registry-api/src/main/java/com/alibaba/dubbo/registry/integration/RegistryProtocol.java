@@ -156,6 +156,7 @@ public class RegistryProtocol implements Protocol {
         final URL registedProviderUrl = getRegistedProviderUrl(originInvoker);
 
         //to judge to delay publish whether or not
+        //配置项 register ，服务提供者是否注册到配置中心。
         boolean register = registedProviderUrl.getParameter("register", true);
 
         // 向注册中心订阅服务消费者
@@ -183,6 +184,7 @@ public class RegistryProtocol implements Protocol {
 
     /**
      * 暴露服务。
+     * {@link bounds}是一个map，防止重复暴露，同时暴露的时候使用synchronized关键字来保证线程安全
      *
      * 此处的 Local 指的是，本地启动服务，但是不包括向注册中心注册服务的意思。
      *
@@ -196,7 +198,7 @@ public class RegistryProtocol implements Protocol {
         String key = getCacheKey(originInvoker);
         // 从 `bounds` 获得，是不是已经暴露过服务
         ExporterChangeableWrapper<T> exporter = (ExporterChangeableWrapper<T>) bounds.get(key);
-        if (exporter == null) {
+        if (exporter == null) {//双重单例模式
             synchronized (bounds) {
                 exporter = (ExporterChangeableWrapper<T>) bounds.get(key);
                 // 未暴露过，进行暴露服务
@@ -275,6 +277,7 @@ public class RegistryProtocol implements Protocol {
         // 从注册中心的 export 参数中，获得服务提供者的 URL
         URL providerUrl = getProviderUrl(originInvoker);
         //The address you see at the registry
+        //移除多余的参数。因为，这些参数注册到注册中心没有实际的用途。
         return providerUrl.removeParameters(getFilteredKeys(providerUrl)) // 移除 .hide 为前缀的参数
                 .removeParameter(Constants.MONITOR_KEY) // monitor
                 .removeParameter(Constants.BIND_IP_KEY) // bind.ip

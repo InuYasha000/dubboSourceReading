@@ -134,6 +134,7 @@ public class ExtensionLoader<T> {
 
     /**
      * 拓展名与 @Activate 的映射
+     * {Class@2943} "class com.alibaba.dubbo.cache.support.lru.LruCacheFactory" -> lru
      *
      * 例如，AccessLogFilter。
      *
@@ -201,7 +202,7 @@ public class ExtensionLoader<T> {
     }
 
     /**
-     * 是否包含 @SPI 注解
+     * 是否包含 @SPI 注解，type类上面是否有SPI注解
      *
      * @param type 类
      * @param <T> 泛型
@@ -840,6 +841,7 @@ public class ExtensionLoader<T> {
      */
     private void loadFile(Map<String, Class<?>> extensionClasses, String dir) {
         // 完整的文件名
+        //例如："META-INF/dubbo/internal/com.alibaba.dubbo.common.extension.ExtensionFactory"
         String fileName = dir + type.getName();
         try {
             Enumeration<java.net.URL> urls;
@@ -863,7 +865,7 @@ public class ExtensionLoader<T> {
                                 final int ci = line.indexOf('#');
                                 if (ci >= 0) line = line.substring(0, ci);
                                 line = line.trim();
-                                if (line.length() > 0) {
+                                if (line.length() > 0) {//有注释时line.length() == 0
                                     try {
                                         // 拆分，key=value 的配置格式
                                         String name = null;
@@ -892,6 +894,10 @@ public class ExtensionLoader<T> {
                                             } else {
                                                 // 缓存拓展 Wrapper 实现类到 `cachedWrapperClasses`
                                                 try {
+                                                    //通过反射的方式，参数为拓展接口，判断当前配置的拓展实现类为拓展 Wrapper 实现类
+                                                    //getConstructor()或getDeclaredConstructor()方法获得构造器（Constructor）对象并调用其newInstance()方法创建对象，
+                                                    // 适用于无参和有参构造方法
+                                                    //所以 倘若是有参构造函数也就是拓展 Wrapper 实现类的话不会报异常，否则就报异常
                                                     clazz.getConstructor(type);
                                                     Set<Class<?>> wrappers = cachedWrapperClasses;
                                                     if (wrappers == null) {
@@ -900,7 +906,7 @@ public class ExtensionLoader<T> {
                                                     }
                                                     wrappers.add(clazz);
                                                 // 缓存拓展实现类到 `extensionClasses`
-                                                } catch (NoSuchMethodException e) {
+                                                } catch (NoSuchMethodException e) {//若获得构造方法失败，则代表是普通的拓展实现类
                                                     clazz.getConstructor();
                                                     // 未配置拓展名，自动生成。例如，DemoFilter 为 demo 。主要用于兼容 Java SPI 的配置。
                                                     if (name == null || name.length() == 0) {
@@ -982,6 +988,7 @@ public class ExtensionLoader<T> {
     @SuppressWarnings("unchecked")
     private T createAdaptiveExtension() {
         try {
+            //反射注入依赖属性，类似IOC
             return injectExtension((T) getAdaptiveExtensionClass().newInstance());
         } catch (Exception e) {
             throw new IllegalStateException("Can not create adaptive extension " + type + ", cause: " + e.getMessage(), e);

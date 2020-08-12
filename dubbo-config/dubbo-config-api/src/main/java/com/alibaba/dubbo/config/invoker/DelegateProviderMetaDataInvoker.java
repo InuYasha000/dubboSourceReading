@@ -23,6 +23,7 @@ import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.Result;
 import com.alibaba.dubbo.rpc.RpcException;
 
+//该对象在 Invoker 对象的基础上，增加了当前服务提供者 ServiceConfig 对象。
 public class DelegateProviderMetaDataInvoker<T> implements Invoker {
 
     /**

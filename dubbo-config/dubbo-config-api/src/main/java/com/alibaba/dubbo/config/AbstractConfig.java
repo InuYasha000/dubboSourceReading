@@ -131,6 +131,7 @@ public abstract class AbstractConfig implements Serializable {
 
     /**
      * 读取启动参数变量和 properties 配置到配置对象
+     * 通过反射
      *
      * 参见：<a href="https://dubbo.gitbooks.io/dubbo-user-book/configuration/properties.html">属性配置</a>
      *

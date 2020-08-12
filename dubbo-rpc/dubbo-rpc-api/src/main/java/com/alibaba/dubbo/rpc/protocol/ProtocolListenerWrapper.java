@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * ListenerProtocol
  *
- * 用于给 Exporter 增加监听器。
+ * 用于给 Exporter 增加监听器。监听 Exporter 暴露完成和取消暴露完成
  */
 public class ProtocolListenerWrapper implements Protocol {
 
@@ -47,15 +47,15 @@ public class ProtocolListenerWrapper implements Protocol {
     }
 
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
-        // 注册中心协议
+        // 注册中心协议,本地暴露服务不会符合这个判断。在远程暴露服务会符合暴露该判断
         if (Constants.REGISTRY_PROTOCOL.equals(invoker.getUrl().getProtocol())) {
             return protocol.export(invoker);
         }
-        // 暴露服务，创建 Exporter 对象
+        // 暴露服务，创建 Exporter（InjvmExporter ） 对象
         Exporter<T> exporter = protocol.export(invoker);
-        // 获得 ExporterListener 数组
+        // 获得 ExporterListener 监听器数组
         List<ExporterListener> listeners = Collections.unmodifiableList(ExtensionLoader.getExtensionLoader(ExporterListener.class).getActivateExtension(invoker.getUrl(), Constants.EXPORTER_LISTENER_KEY));
-        // 创建带 ExporterListener 的 Exporter 对象
+        // 创建带 ExporterListener 的 Exporter 对象，在这个过程中，会执行 ExporterListener#exported(exporter) 方法
         return new ListenerExporterWrapper<T>(exporter, listeners);
     }
 
