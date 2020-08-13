@@ -85,12 +85,14 @@ public abstract class AbstractRegistry implements Registry {
     // File cache timing writing
     private final ExecutorService registryCacheExecutor = Executors.newFixedThreadPool(1, new NamedThreadFactory("DubboSaveRegistryCache", true));
     /**
+     * {@link #properties} 发生变更时候，是同步还是异步写入 file
      * 是否同步保存文件
      */
     // Is it synchronized to save the file
     private final boolean syncSaveFile;
     /**
      * 数据版本号
+     * 因为每次写入 file 是全量，而不是增量写入，通过版本号，避免老版本覆盖新版本。
      *
      * {@link #properties}
      */

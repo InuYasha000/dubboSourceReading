@@ -38,13 +38,13 @@ public class ProviderConsumerRegTable {
     /**
      * 服务提供者 Invoker 集合
      *
-     * key：服务提供者 URL 服务键
+     * key：服务提供者 URL 服务键(providerUrl.getServiceKey())
      */
     public static ConcurrentHashMap<String, Set<ProviderInvokerWrapper>> providerInvokers = new ConcurrentHashMap<String, Set<ProviderInvokerWrapper>>();
     /**
      * 服务消费者 Invoker 集合
      *
-     * key：服务消费者 URL 服务键
+     * key：服务消费者 URL 服务键(consumerUrl.getServiceKey())
      */
     public static ConcurrentHashMap<String, Set<ConsumerInvokerWrapper>> consumerInvokers = new ConcurrentHashMap<String, Set<ConsumerInvokerWrapper>>();
 
